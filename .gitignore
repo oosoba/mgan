@@ -1,0 +1,44 @@
+.idea/workspace.xml
+__pycache__/test_function.cpython-36.pyc
+*.class
+*.log
+.ipynb_checkpoints/
+*.pyc
+
+
+_tmp*
+train_*
+model/
+frames/
+MNIST/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+dependency-reduced-pom.xml
+target/
+
+log/
+tmp/
+
+# spark-shell
+derby.log
+metastor_db/
+.Rproj.user
+
+keras-rl-master
+
+# Personal logs
+*.pts
+*.pdf
