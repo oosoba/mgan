@@ -1,3 +1,5 @@
+from gan_misc import DiscriminatorNetwork
+from gan_misc import GeneratorNetwork
 '''
 init:11May18
 revamp: Jan2019
@@ -10,8 +12,9 @@ Monitoring:
 tensorboard --logdir=gAuction_1:'./log/train_gan_auction_worker_1'
 '''
 
-#from __future__ import division, absolute_import  # , print_function
-import argparse, sys
+# from __future__ import division, absolute_import  # , print_function
+import argparse
+import sys
 import numpy as np
 import scipy as sp
 from collections import defaultdict
@@ -20,10 +23,8 @@ from collections import defaultdict
 import tensorflow as tf
 #import tensorflow.contrib.slim as slim
 
-## GAN auxillary functions
+# GAN auxillary functions
 sys.path.append('.')
-from gan_misc import GeneratorNetwork
-from gan_misc import DiscriminatorNetwork
 
 # Global var defs
 __version__ = "0.0.3"
@@ -41,12 +42,13 @@ aggregators = {
     "min": (lambda sa: tf.reduce_min(tf.log(sa), axis=1))
 }
 __agg_opts__ = aggregators.keys()
-## careful with dict in py3, need to list keys/values
+# careful with dict in py3, need to list keys/values
+
 
 class GANAuction():
     def __init__(self, data,
                  auction_size=3,
-                 noiseDim = _noiseDim_,
+                 noiseDim=_noiseDim_,
                  generatorTemplateFxn=GeneratorNetwork,
                  discriminatorTemplateFxn=DiscriminatorNetwork,
                  genScope="generator",
@@ -61,7 +63,7 @@ class GANAuction():
         self.name = class_name + str(name)
         self.model_path = model_path+"/train_"+str(self.name)
         self.summary_writer = tf.summary.FileWriter(
-            logdir = self.model_path
+            logdir=self.model_path
         )
         self.autosave_every = _every_
         self.aggregatorFxn = aggregators[aggregator] if aggregator in aggregators.keys(
@@ -237,7 +239,23 @@ class GANAuction():
             self.gen_sample,
             feed_dict={
                 self.n_input: np.random.normal(size=[int(ns), self.n_size])
-                })
+            })
+
+    def rateSamples(self, sess, gs):
+        '''Evaluate the quality of generated responses to given conditions.
+        needs:
+            - generated samples tensor (gs)
+        gives:
+            - tensor of discriminator scores (in [0,1]) for given scenarios.
+        [one column per discriminator]
+        '''
+        feed_dict = {self.d_input: gs}
+        # Rate
+        disc_ratings = sess.run(
+            list(self.disc_reals.values()),
+            feed_dict=feed_dict
+        )
+        return disc_ratings
 
 # Snip.
 # Auction process....

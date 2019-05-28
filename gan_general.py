@@ -1,3 +1,5 @@
+from gan_misc import DiscriminatorNetwork
+from gan_misc import GeneratorNetwork
 '''
 init:11Apr18
 upd: Jan2019
@@ -9,8 +11,13 @@ Monitoring:
 tensorboard --logdir=gan_worker_1:'./log/train_gan_worker_1'
 '''
 
-#from __future__ import division, absolute_import  # , print_function
-import argparse, sys, os, re, json, csv
+# from __future__ import division, absolute_import  # , print_function
+import argparse
+import sys
+import os
+import re
+import json
+import csv
 import numpy as np
 import scipy as sp
 
@@ -22,10 +29,8 @@ import tensorflow as tf
 #ds = tf.contrib.distributions
 
 
-## GAN auxillary functions
+# GAN auxillary functions
 sys.path.append('.')
-from gan_misc import GeneratorNetwork
-from gan_misc import DiscriminatorNetwork
 
 # Global var defs
 __version__ = "0.0.3"
@@ -39,7 +44,7 @@ _noiseDim_ = 1
 
 class GAN():
     def __init__(self, data,
-                 noiseDim = _noiseDim_,
+                 noiseDim=_noiseDim_,
                  generatorTemplateFxn=GeneratorNetwork,
                  discriminatorTemplateFxn=DiscriminatorNetwork,
                  genScope="generator",
@@ -53,7 +58,7 @@ class GAN():
         self.name = "gan_" + str(name)
         self.model_path = model_path+"/train_"+str(self.name)
         self.summary_writer = tf.summary.FileWriter(
-            logdir = self.model_path
+            logdir=self.model_path
         )
         self.autosave_every = _every_
 
@@ -168,7 +173,19 @@ class GAN():
             self.gen_sample,
             feed_dict={
                 self.n_input: np.random.normal(size=[int(ns), self.n_size])
-                })
+            })
+
+    def rateSamples(self, sess, gs):
+        '''Evaluate the quality of generated responses to given conditions.
+        needs:
+            - generated samples tensor (gs)
+        gives:
+            - tensor of discriminator scores (in [0,1]) for given scenarios.
+        '''
+        feed_dict = {self.d_input: gs}
+        # Rate
+        disc_ratings = sess.run(self.disc_real, feed_dict=feed_dict)
+        return disc_ratings
 
 # # Ancillary Fxns: Networks now in gan_misc.py
 # def GeneratorNetwork(...):
